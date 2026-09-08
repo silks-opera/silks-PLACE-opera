@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
     <title>OPERA 卡牌大師</title>
     <!-- iOS 主畫面與分頁圖示 -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -43,7 +43,7 @@
         
         .app-container { width: 100%; max-width: 480px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
-        /* 頂部 Header：等比例鎖定 Logo */
+        /* 頂部 Header */
         header { display: flex; justify-content: space-between; align-items: center; padding: 4px 2px; }
         .header-left { display: flex; align-items: center; gap: 10px; }
         
@@ -51,20 +51,13 @@
             height: 38px;
             width: auto;
             max-width: 45px;
-            object-fit: contain; /* 鎖定比例，絕對不拉伸變形 */
+            object-fit: contain;
             display: block;
             transition: filter 0.2s;
         }
 
-        /* 深色模式：自動將黑字轉為純白 */
-        body:not(.light-mode) .silks-logo {
-            filter: brightness(0) invert(1);
-        }
-
-        /* 淺色模式：保持原色黑字 */
-        body.light-mode .silks-logo {
-            filter: none;
-        }
+        body:not(.light-mode) .silks-logo { filter: brightness(0) invert(1); }
+        body.light-mode .silks-logo { filter: none; }
 
         .app-title { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; transition: color 0.2s; }
         .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); padding: 7px 14px; border-radius: 20px; cursor: pointer; color: var(--text-main); font-size: 13px; font-weight: 700; transition: 0.2s; }
@@ -77,8 +70,8 @@
         .view-content { display: none; flex-direction: column; gap: 14px; }
         .view-content.active { display: flex; }
 
-        /* 大卡牌核心容器 */
-        .flashcard-container { perspective: 1000px; width: 100%; height: 390px; }
+        /* 大卡牌核心容器（字體已放大 20%） */
+        .flashcard-container { perspective: 1000px; width: 100%; height: 380px; transition: height 0.25s ease; }
         .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 28px; }
         .flashcard.flipped { transform: rotateY(180deg); }
         
@@ -89,15 +82,16 @@
         .card-star.active { color: #f59e0b; }
         .card-badge { font-size: 13px; font-weight: 800; padding: 6px 16px; border-radius: 16px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--primary); }
         
-        .card-prompt-text { font-size: 42px; font-weight: 900; letter-spacing: 0.5px; color: var(--text-main); margin: auto 0; line-height: 1.35; padding: 0 10px; word-break: break-word; }
-        .card-prompt-text.long-text { font-size: 28px; }
+        /* 核心文字放大 20%（由 42px 增至 50px，長文字由 28px 增至 34px） */
+        .card-prompt-text { font-size: 50px; font-weight: 900; letter-spacing: 0.5px; color: var(--text-main); margin: auto 0; line-height: 1.35; padding: 0 10px; word-break: break-word; }
+        .card-prompt-text.long-text { font-size: 34px; }
 
         /* 卡牌背面答案展現 */
         .result-badge { font-size: 16px; font-weight: 800; padding: 7px 18px; border-radius: 20px; }
         .result-badge.correct { background: rgba(16, 185, 129, 0.2); color: var(--accent); border: 1px solid var(--accent); }
         .result-badge.wrong { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .ans-code { font-size: 38px; font-weight: 900; color: var(--primary); margin-top: 6px; }
-        .ans-cn { font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 6px; line-height: 1.3; }
+        .ans-code { font-size: 46px; font-weight: 900; color: var(--primary); margin-top: 6px; }
+        .ans-cn { font-size: 26px; font-weight: 800; color: var(--text-main); margin-top: 6px; line-height: 1.3; }
         .ans-user { font-size: 14px; color: var(--text-sub); margin-top: 12px; background: var(--input-bg); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border-color); }
 
         /* 下方輸入框與按鈕 */
@@ -111,6 +105,18 @@
         .btn-action { background: var(--primary); color: var(--primary-btn-text); padding: 16px; border-radius: 20px; font-weight: 800; border: none; width: 100%; cursor: pointer; font-size: 17px; transition: opacity 0.2s; }
         .btn-action:active { opacity: 0.85; }
         .hidden { display: none !important; }
+
+        /* 📱 鍵盤喚起特訓模式：自動隱藏干擾元素，卡牌與輸入框自動居中不遮擋 */
+        body.keyboard-open { padding-bottom: 10px; }
+        body.keyboard-open header,
+        body.keyboard-open .stats-bar,
+        body.keyboard-open .nav-bar { display: none !important; }
+        body.keyboard-open .flashcard-container { height: 210px !important; margin-top: 4px; }
+        body.keyboard-open .card-face { padding: 14px 16px !important; }
+        body.keyboard-open .card-prompt-text { font-size: 38px !important; }
+        body.keyboard-open .card-prompt-text.long-text { font-size: 26px !important; }
+        body.keyboard-open .card-star,
+        body.keyboard-open .card-face div[style*="font-size: 13px"] { display: none; }
 
         /* 測驗模式 (四選一) */
         .quiz-card { background: var(--card-bg); border-radius: 24px; padding: 24px 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
@@ -145,12 +151,10 @@
 
 <div class="app-container">
     <header>
-        <!-- 左上角：官方原版比例 Logo + 標題文字 -->
         <div class="header-left">
-            <img src="silks_logo.png" alt="晶英酒店" class="silks-logo">
+            <img src="silks_logo.png" alt="晶英酒店" class="silks-logo" onerror="this.style.display='none'">
             <div class="app-title">OPERA 卡牌大師</div>
         </div>
-        <!-- 右上角：主題切換按鈕 -->
         <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙 深色模式</button>
     </header>
 
@@ -409,7 +413,6 @@ function nextCard() {
     document.getElementById('next-card-btn').classList.add('hidden');
     const input = document.getElementById('type-input');
     input.value = '';
-    input.focus();
 
     setTimeout(() => {
         const pool = getPool();
@@ -439,6 +442,9 @@ function submitAnswer() {
     const input = document.getElementById('type-input');
     const val = input.value.trim();
     if (!val) return;
+
+    // 答題送出後收起鍵盤並還原介面高度
+    input.blur();
 
     state.stats.total++;
     let isCorrect = false;
@@ -487,6 +493,18 @@ function toggleFav(e) {
     saveState();
     document.getElementById('card-star').classList.toggle('active', state.favs.includes(currentCard.code));
 }
+
+// 📱 監聽輸入框焦點：彈出鍵盤時自動優化視野
+const typeInput = document.getElementById('type-input');
+typeInput.addEventListener('focus', () => {
+    document.body.classList.add('keyboard-open');
+    setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 150);
+});
+typeInput.addEventListener('blur', () => {
+    document.body.classList.remove('keyboard-open');
+});
 
 // 2. 考題測驗頁 (隨機中翻英 / 英翻中)
 let currentQuiz = null;
