@@ -46,20 +46,56 @@
             display: flex; 
             justify-content: center; 
             min-height: 100vh; 
-            padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px)); 
             transition: background-color 0.2s; 
         }
-        
-        .app-container { width: 100%; max-width: 480px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+
+        /* 📱 手機端：精準適配一螢幕完整呈現 */
+        @media (max-width: 859px) {
+            html, body { height: 100%; overflow-x: hidden; }
+            body { 
+                min-height: 100dvh; 
+                padding-bottom: calc(72px + env(safe-area-inset-bottom, 16px)); 
+            }
+            .app-container { 
+                width: 100%; 
+                max-width: 480px; 
+                min-height: calc(100dvh - 72px - env(safe-area-inset-bottom, 16px));
+                padding: 10px 14px 6px 14px; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: space-between; 
+                gap: 8px; 
+            }
+            .stats-bar { padding: 8px 10px; border-radius: 16px; }
+            .stat-item .val { font-size: 16px; }
+            .flashcard-container { 
+                height: clamp(210px, 34vh, 280px); 
+            }
+            .card-face { padding: 16px 14px; border-radius: 22px; }
+            .card-prompt-text { font-size: clamp(28px, 8vw, 42px); }
+            .card-prompt-text.long-text { font-size: clamp(20px, 5.5vw, 28px); }
+            .card-input { padding: 14px 16px; font-size: 16px; border-radius: 18px; }
+            .btn-submit { padding: 0 20px; font-size: 16px; border-radius: 18px; }
+            .btn-action { padding: 14px; font-size: 16px; border-radius: 18px; }
+
+            /* 鍵盤真正升起時才啟動緊湊模式 */
+            body.keyboard-open .stats-bar { display: none !important; }
+            body.keyboard-open .flashcard-container { height: 170px !important; }
+            body.keyboard-open .card-face { padding: 10px !important; }
+            body.keyboard-open .card-prompt-text { font-size: 26px !important; }
+            body.keyboard-open .card-prompt-text.long-text { font-size: 18px !important; }
+            body.keyboard-open .card-star,
+            body.keyboard-open .card-face div[style*="font-size: 13px"] { display: none; }
+        }
 
         /* 頂部 Header */
-        header { display: flex; justify-content: space-between; align-items: center; padding: 4px 2px; }
-        .header-left { display: flex; align-items: center; gap: 10px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 2px 2px; }
+        .header-left { display: flex; align-items: center; gap: 8px; }
         
         .silks-logo {
-            height: 38px;
+            height: 34px;
             width: auto;
-            max-width: 45px;
+            max-width: 42px;
             object-fit: contain;
             display: block;
             transition: filter 0.2s;
@@ -68,92 +104,77 @@
         body:not(.light-mode) .silks-logo { filter: brightness(0) invert(1); }
         body.light-mode .silks-logo { filter: none; }
 
-        .app-title { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; transition: color 0.2s; }
-        .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); padding: 7px 14px; border-radius: 20px; cursor: pointer; color: var(--text-main); font-size: 13px; font-weight: 700; transition: 0.2s; }
+        .app-title { font-size: 19px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; transition: color 0.2s; }
+        .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 20px; cursor: pointer; color: var(--text-main); font-size: 12px; font-weight: 700; transition: 0.2s; }
 
-        /* 電腦版頂部選單 */
         .desktop-nav { display: none; }
 
         /* 數據總覽 Bar */
-        .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: var(--card-bg); padding: 14px 12px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); text-align: center; }
-        .stat-item .val { font-size: 18px; font-weight: 800; color: var(--primary); }
-        .stat-item .lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+        .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: var(--shadow); text-align: center; }
+        .stat-item .val { font-weight: 800; color: var(--primary); }
+        .stat-item .lbl { font-size: 11px; color: var(--text-sub); margin-top: 1px; }
 
-        .view-content { display: none; flex-direction: column; gap: 14px; width: 100%; }
+        .view-content { display: none; flex-direction: column; gap: 10px; width: 100%; flex: 1; justify-content: space-between; }
         .view-content.active { display: flex; }
 
-        /* 學習區結構容器 */
-        .learn-layout { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+        .learn-layout { display: flex; flex-direction: column; gap: 10px; width: 100%; flex: 1; justify-content: space-between; }
         .desktop-side-panel { display: none; }
 
         /* 大卡牌核心容器 */
-        .flashcard-container { perspective: 1000px; width: 100%; height: 380px; transition: height 0.25s ease; }
-        .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 28px; }
+        .flashcard-container { perspective: 1000px; width: 100%; transition: height 0.25s ease; }
+        .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 24px; }
         .flashcard.flipped { transform: rotateY(180deg); }
         
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 28px; background: var(--card-bg); border: 1px solid var(--border-color); padding: 26px 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; box-shadow: var(--shadow); }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 24px; background: var(--card-bg); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; box-shadow: var(--shadow); }
         .card-back { transform: rotateY(180deg); }
 
-        .card-star { position: absolute; top: 20px; right: 22px; font-size: 26px; color: #404040; cursor: pointer; z-index: 10; }
+        .card-star { position: absolute; top: 16px; right: 18px; font-size: 24px; color: #404040; cursor: pointer; z-index: 10; }
         .card-star.active { color: #f59e0b; }
-        .card-badge { font-size: 13px; font-weight: 800; padding: 6px 16px; border-radius: 16px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--primary); }
+        .card-badge { font-size: 12px; font-weight: 800; padding: 5px 14px; border-radius: 14px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--primary); }
         
-        .card-prompt-text { font-size: 50px; font-weight: 900; letter-spacing: 0.5px; color: var(--text-main); margin: auto 0; line-height: 1.35; padding: 0 10px; word-break: break-word; }
-        .card-prompt-text.long-text { font-size: 34px; }
+        .card-prompt-text { font-weight: 900; letter-spacing: 0.5px; color: var(--text-main); margin: auto 0; line-height: 1.3; padding: 0 10px; word-break: break-word; }
 
         /* 卡牌背面答案展現 */
-        .result-badge { font-size: 16px; font-weight: 800; padding: 7px 18px; border-radius: 20px; }
+        .result-badge { font-size: 15px; font-weight: 800; padding: 6px 16px; border-radius: 18px; }
         .result-badge.correct { background: rgba(16, 185, 129, 0.2); color: var(--accent); border: 1px solid var(--accent); }
         .result-badge.wrong { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
-        .ans-code { font-size: 46px; font-weight: 900; color: var(--primary); margin-top: 6px; }
-        .ans-cn { font-size: 24px; font-weight: 800; color: var(--text-main); margin-top: 6px; line-height: 1.3; }
-        .ans-user { font-size: 14px; color: var(--text-sub); margin-top: 12px; background: var(--input-bg); padding: 6px 14px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .ans-code { font-size: 38px; font-weight: 900; color: var(--primary); margin-top: 4px; }
+        .ans-cn { font-size: 20px; font-weight: 800; color: var(--text-main); margin-top: 4px; line-height: 1.25; }
+        .ans-user { font-size: 13px; color: var(--text-sub); margin-top: 8px; background: var(--input-bg); padding: 5px 12px; border-radius: 10px; border: 1px solid var(--border-color); }
 
         /* 下方輸入框與按鈕 */
-        .action-area { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .input-group { width: 100%; display: flex; gap: 10px; }
-        .card-input { flex: 1; padding: 18px 20px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 18px; font-weight: 700; outline: none; transition: 0.2s; box-shadow: var(--shadow); }
+        .action-area { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .input-group { width: 100%; display: flex; gap: 8px; }
+        .card-input { flex: 1; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 700; outline: none; transition: 0.2s; box-shadow: var(--shadow); }
         .card-input:focus { border-color: var(--primary); }
-        .btn-submit { background: var(--primary); color: var(--primary-btn-text); border: none; border-radius: 20px; padding: 0 26px; font-size: 17px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
+        .btn-submit { background: var(--primary); color: var(--primary-btn-text); border: none; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
         .btn-submit:active { opacity: 0.85; }
         
-        .btn-action { background: var(--primary); color: var(--primary-btn-text); padding: 16px; border-radius: 20px; font-weight: 800; border: none; width: 100%; cursor: pointer; font-size: 17px; transition: opacity 0.2s, background-color 0.2s; }
+        .btn-action { background: var(--primary); color: var(--primary-btn-text); font-weight: 800; border: none; width: 100%; cursor: pointer; transition: opacity 0.2s, background-color 0.2s; }
         .btn-action:active { opacity: 0.85; }
         .hidden { display: none !important; }
 
-        /* 📱 鍵盤喚起特訓模式 */
-        body.keyboard-open { padding-bottom: 10px; }
-        body.keyboard-open header,
-        body.keyboard-open .stats-bar,
-        body.keyboard-open .nav-bar { display: none !important; }
-        body.keyboard-open .flashcard-container { height: 210px !important; margin-top: 4px; }
-        body.keyboard-open .card-face { padding: 14px 16px !important; }
-        body.keyboard-open .card-prompt-text { font-size: 38px !important; }
-        body.keyboard-open .card-prompt-text.long-text { font-size: 26px !important; }
-        body.keyboard-open .card-star,
-        body.keyboard-open .card-face div[style*="font-size: 13px"] { display: none; }
-
-        /* 測驗模式 (四選一) */
-        .quiz-card { background: var(--card-bg); border-radius: 24px; padding: 24px 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
-        .quiz-q { font-size: 20px; font-weight: 800; margin-bottom: 20px; line-height: 1.4; }
-        .quiz-opts { display: flex; flex-direction: column; gap: 12px; }
-        .q-opt { background: var(--input-bg); border: 1px solid var(--border-color); padding: 16px 20px; border-radius: 18px; font-weight: 700; font-size: 16px; text-align: left; cursor: pointer; color: var(--text-main); transition: 0.15s; }
+        /* 測驗模式 */
+        .quiz-card { background: var(--card-bg); border-radius: 22px; padding: 20px 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
+        .quiz-q { font-size: 18px; font-weight: 800; margin-bottom: 16px; line-height: 1.4; }
+        .quiz-opts { display: flex; flex-direction: column; gap: 10px; }
+        .q-opt { background: var(--input-bg); border: 1px solid var(--border-color); padding: 14px 16px; border-radius: 16px; font-weight: 700; font-size: 15px; text-align: left; cursor: pointer; color: var(--text-main); transition: 0.15s; }
         .q-opt.correct { background: rgba(16, 185, 129, 0.2); border-color: var(--accent); color: var(--accent); }
         .q-opt.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--danger); color: var(--danger); }
 
         /* 代碼庫清單 */
-        .search-box { width: 100%; padding: 16px 20px; border-radius: 18px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 16px; font-weight: 600; outline: none; }
-        .list-container { display: flex; flex-direction: column; gap: 10px; }
-        .list-item { background: var(--card-bg); padding: 16px 20px; border-radius: 20px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-        .list-item-left .code { font-weight: 900; font-size: 18px; color: var(--primary); }
-        .list-item-left .cn { font-size: 15px; font-weight: 700; color: var(--text-main); margin-top: 4px; }
+        .search-box { width: 100%; padding: 14px 18px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 15px; font-weight: 600; outline: none; }
+        .list-container { display: flex; flex-direction: column; gap: 8px; }
+        .list-item { background: var(--card-bg); padding: 14px 18px; border-radius: 18px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .list-item-left .code { font-weight: 900; font-size: 17px; color: var(--primary); }
+        .list-item-left .cn { font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 3px; }
         .list-item-cat { font-size: 11px; padding: 3px 8px; border-radius: 8px; background: var(--input-bg); color: var(--text-sub); font-weight: 700; }
 
-        /* 設定頁面專屬風格 */
-        .setting-section { background: var(--card-bg); border-radius: 24px; padding: 22px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 14px; }
-        .setting-title { font-size: 16px; font-weight: 800; color: var(--text-main); }
-        .pool-selector { display: flex; flex-direction: column; gap: 10px; }
-        .pool-opt { background: var(--input-bg); border: 1px solid var(--border-color); padding: 16px 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        /* 設定頁面 */
+        .setting-section { background: var(--card-bg); border-radius: 22px; padding: 18px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; }
+        .setting-title { font-size: 15px; font-weight: 800; color: var(--text-main); }
+        .pool-selector { display: flex; flex-direction: column; gap: 8px; }
+        .pool-opt { background: var(--input-bg); border: 1px solid var(--border-color); padding: 14px 16px; border-radius: 14px; font-size: 14px; font-weight: 700; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .pool-opt.active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 
         /* 手機底部導覽列 */
@@ -168,183 +189,46 @@
             border-top: 1px solid var(--border-color); 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
-            padding-top: 10px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 16px)); 
+            padding-top: 8px;
+            padding-bottom: calc(14px + env(safe-area-inset-bottom, 12px)); 
             z-index: 100; 
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; border: none; background: none; color: var(--text-sub); font-size: 11px; font-weight: 700; cursor: pointer; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; border: none; background: none; color: var(--text-sub); font-size: 11px; font-weight: 700; cursor: pointer; }
         .nav-item.active { color: var(--primary); }
-        .nav-item .icon { font-size: 20px; }
+        .nav-item .icon { font-size: 18px; }
 
-        /* ============================================================
-           💻 電腦端超寬高質感介面（螢幕寬度 >= 860px 時自動啟動）
-           ============================================================ */
+        /* 💻 電腦端擴展佈局（>= 860px） */
         @media (min-width: 860px) {
             body { padding-bottom: 30px; }
             .app-container { max-width: 1120px; padding: 24px 32px; gap: 20px; }
-
             .nav-bar { display: none !important; }
-            .desktop-nav { 
-                display: flex; 
-                gap: 8px; 
-                background: var(--card-bg); 
-                padding: 6px; 
-                border-radius: 18px; 
-                border: 1px solid var(--border-color);
-            }
-            .d-nav-item {
-                border: none;
-                background: transparent;
-                padding: 8px 18px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 700;
-                color: var(--text-sub);
-                cursor: pointer;
-                transition: 0.2s;
-            }
-            .d-nav-item.active {
-                background: var(--primary);
-                color: var(--primary-btn-text);
-            }
-
-            .learn-layout {
-                display: grid;
-                grid-template-columns: 580px 1fr;
-                gap: 24px;
-                align-items: start;
-            }
-
-            .desktop-side-panel {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-                height: 100%;
-            }
-
-            .side-card {
-                background: var(--card-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 24px;
-                padding: 20px;
-                box-shadow: var(--shadow);
-            }
-            .side-title {
-                font-size: 15px;
-                font-weight: 800;
-                color: var(--primary);
-                margin-bottom: 12px;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            /* 📊 弱點分析圓餅圖樣式 */
-            .chart-content-box {
-                display: flex;
-                align-items: center;
-                gap: 20px;
-                padding: 4px 0;
-            }
-            .chart-donut {
-                width: 120px;
-                height: 120px;
-                border-radius: 50%;
-                position: relative;
-                flex-shrink: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: background 0.3s ease;
-            }
-            .chart-donut::after {
-                content: '';
-                width: 78px;
-                height: 78px;
-                background: var(--card-bg);
-                border-radius: 50%;
-                position: absolute;
-            }
-            .chart-center-info {
-                position: relative;
-                z-index: 2;
-                text-align: center;
-            }
-            .chart-center-val {
-                font-size: 22px;
-                font-weight: 900;
-                color: var(--text-main);
-                line-height: 1.1;
-            }
-            .chart-center-lbl {
-                font-size: 10px;
-                color: var(--text-sub);
-                margin-top: 2px;
-            }
-
-            .chart-legend {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-                flex: 1;
-            }
-            .legend-item {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                font-size: 13px;
-                font-weight: 700;
-            }
-            .legend-left {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .legend-dot {
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                flex-shrink: 0;
-            }
-            .legend-count {
-                color: var(--text-sub);
-                font-size: 12px;
-            }
-
-            /* 右側微型代碼速查清單 */
-            .mini-search-box {
-                width: 100%;
-                padding: 10px 14px;
-                border-radius: 12px;
-                border: 1px solid var(--border-color);
-                background: var(--input-bg);
-                color: var(--text-main);
-                font-size: 13px;
-                outline: none;
-                margin-bottom: 10px;
-            }
-            .mini-list-scroll {
-                max-height: 200px;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-                padding-right: 4px;
-            }
-            .mini-list-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 8px 12px;
-                background: var(--input-bg);
-                border-radius: 10px;
-                font-size: 13px;
-            }
+            .desktop-nav { display: flex; gap: 8px; background: var(--card-bg); padding: 6px; border-radius: 18px; border: 1px solid var(--border-color); }
+            .d-nav-item { border: none; background: transparent; padding: 8px 18px; border-radius: 12px; font-size: 14px; font-weight: 700; color: var(--text-sub); cursor: pointer; transition: 0.2s; }
+            .d-nav-item.active { background: var(--primary); color: var(--primary-btn-text); }
+            .learn-layout { display: grid; grid-template-columns: 580px 1fr; gap: 24px; align-items: start; }
+            .flashcard-container { height: 380px; }
+            .card-prompt-text { font-size: 50px; }
+            .card-prompt-text.long-text { font-size: 34px; }
+            .desktop-side-panel { display: flex; flex-direction: column; gap: 16px; height: 100%; }
+            .side-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 20px; box-shadow: var(--shadow); }
+            .side-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+            .chart-content-box { display: flex; align-items: center; gap: 20px; padding: 4px 0; }
+            .chart-donut { width: 120px; height: 120px; border-radius: 50%; position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+            .chart-donut::after { content: ''; width: 78px; height: 78px; background: var(--card-bg); border-radius: 50%; position: absolute; }
+            .chart-center-info { position: relative; z-index: 2; text-align: center; }
+            .chart-center-val { font-size: 22px; font-weight: 900; color: var(--text-main); line-height: 1.1; }
+            .chart-center-lbl { font-size: 10px; color: var(--text-sub); margin-top: 2px; }
+            .chart-legend { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+            .legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; }
+            .legend-left { display: flex; align-items: center; gap: 8px; }
+            .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+            .legend-count { color: var(--text-sub); font-size: 12px; }
+            .mini-search-box { width: 100%; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 13px; outline: none; margin-bottom: 10px; }
+            .mini-list-scroll { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+            .mini-list-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--input-bg); border-radius: 10px; font-size: 13px; }
             .mini-list-item .m-code { font-weight: 800; color: var(--primary); }
             .mini-list-item .m-cn { color: var(--text-sub); font-size: 12px; }
-
-            #view-quiz .quiz-card,
-            #view-settings .setting-section { max-width: 700px; margin: 0 auto; width: 100%; }
+            #view-quiz .quiz-card, #view-settings .setting-section { max-width: 700px; margin: 0 auto; width: 100%; }
         }
     </style>
 </head>
@@ -357,7 +241,6 @@
             <div class="app-title">OPERA 卡牌大師</div>
         </div>
 
-        <!-- 💻 電腦版頂部切換選單 -->
         <div class="desktop-nav">
             <button class="d-nav-item active" onclick="switchTab('learn', this)">📖 學習卡片</button>
             <button class="d-nav-item" onclick="switchTab('quiz', this)">📝 考題測驗</button>
@@ -379,8 +262,7 @@
     <!-- 1. 學習卡片頁 -->
     <div id="view-learn" class="view-content active">
         <div class="learn-layout">
-            <!-- 左欄：核心刷題卡牌與輸入框 -->
-            <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%; flex: 1; justify-content: space-between;">
                 <div class="flashcard-container">
                     <div class="flashcard" id="main-card">
                         <div class="card-face card-front">
@@ -410,7 +292,7 @@
                 </div>
             </div>
 
-            <!-- 💻 右欄：電腦版專屬即時弱點圓餅圖 + 速查清單 -->
+            <!-- 電腦版右側面板 -->
             <div class="desktop-side-panel">
                 <div class="side-card">
                     <div class="side-title">📊 錯題弱點分析（各類別佔比）</div>
@@ -477,7 +359,7 @@
     </div>
 </div>
 
-<!-- 📱 手機端底部導覽列 -->
+<!-- 手機端底部導覽列 -->
 <nav class="nav-bar">
     <button class="nav-item active" onclick="switchTab('learn', this)"><span class="icon">📖</span>學習卡片</button>
     <button class="nav-item" onclick="switchTab('quiz', this)"><span class="icon">📝</span>考題測驗</button>
@@ -727,6 +609,7 @@ let currentCard = null;
 let currentDirection = 'code';
 let lastSubmitTime = 0;
 let isNextCooldown = false;
+let isFirstLoad = true;
 
 function getPool() {
     if (state.poolType === 'wrong') {
@@ -740,7 +623,7 @@ function getPool() {
     return db;
 }
 
-function nextCard() {
+function nextCard(shouldFocus = false) {
     const cardEl = document.getElementById('main-card');
     cardEl.classList.remove('flipped');
 
@@ -770,14 +653,19 @@ function nextCard() {
 
         const isFav = state.favs.includes(currentCard.code);
         document.getElementById('card-star').classList.toggle('active', isFav);
-        input.focus();
+
+        // 電腦端或主動按下一題時才自動聚焦，避免手機啟動時誤彈鍵盤
+        const isDesktop = window.innerWidth >= 860;
+        if ((isDesktop || shouldFocus) && !isFirstLoad) {
+            input.focus();
+        }
+        isFirstLoad = false;
     }, 200);
 }
 
-// ⏱️ 停留 1 秒緩衝進下一題，避免按太快漏看錯題答案
 function requestNextCard() {
     if (isNextCooldown) return;
-    if (Date.now() - lastSubmitTime < 350) return; // 防止送出答案的同次 Enter 誤觸連擊
+    if (Date.now() - lastSubmitTime < 350) return;
 
     isNextCooldown = true;
     const btn = document.getElementById('next-card-btn');
@@ -790,7 +678,7 @@ function requestNextCard() {
         btn.style.opacity = "1";
         btn.style.pointerEvents = "auto";
         isNextCooldown = false;
-        nextCard();
+        nextCard(true);
     }, 1000);
 }
 
@@ -872,7 +760,7 @@ function requestNextQuiz() {
     }, 1000);
 }
 
-// ⌨️ 全域 Enter 鍵智慧監聽
+// ⌨️ 全域 Enter 鍵監聽
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const nextCardBtn = document.getElementById('next-card-btn');
@@ -895,8 +783,9 @@ window.addEventListener('keydown', (e) => {
 
 const typeInput = document.getElementById('type-input');
 typeInput.addEventListener('focus', () => {
-    document.body.classList.add('keyboard-open');
-    setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 150);
+    if (window.innerWidth < 860) {
+        document.body.classList.add('keyboard-open');
+    }
 });
 typeInput.addEventListener('blur', () => {
     document.body.classList.remove('keyboard-open');
@@ -976,7 +865,7 @@ function changePool(type) {
     document.querySelectorAll('.pool-opt').forEach(el => el.classList.remove('active'));
     document.getElementById(`pool-${type}`).classList.add('active');
     saveState();
-    nextCard();
+    nextCard(false);
 }
 
 function renderSearchList() {
@@ -1061,7 +950,7 @@ function resetAllData() {
 }
 
 loadState();
-nextCard();
+nextCard(false);
 nextQuizQuestion();
 renderMiniSearch();
 </script>
