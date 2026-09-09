@@ -40,7 +40,6 @@
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
-        /* 增加底部留白，避免內容被升高的導覽列遮擋 */
         body { 
             background-color: var(--bg-color); 
             color: var(--text-main); 
@@ -149,7 +148,7 @@
         .pool-opt { background: var(--input-bg); border: 1px solid var(--border-color); padding: 16px 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .pool-opt.active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 
-        /* 📱 底部導覽列：墊高避開 iPhone 小白條 */
+        /* 底部導覽列 */
         .nav-bar { 
             position: fixed; 
             bottom: 0; 
@@ -162,7 +161,7 @@
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
             padding-top: 10px;
-            padding-bottom: calc(20px + env(safe-area-inset-bottom, 16px)); /* 完美墊高 */
+            padding-bottom: calc(20px + env(safe-area-inset-bottom, 16px)); 
             z-index: 100; 
         }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; border: none; background: none; color: var(--text-sub); font-size: 11px; font-weight: 700; cursor: pointer; }
@@ -208,7 +207,7 @@
                         <div class="ans-cn" id="card-ans-cn">房間已清潔，待查房，不可入住</div>
                         <div class="ans-user" id="card-ans-user">你的輸入：VC</div>
                     </div>
-                    <div style="font-size: 13px; color: var(--text-sub);">點擊下方「下一題」繼續刷題</div>
+                    <div style="font-size: 13px; color: var(--text-sub);">按 Enter 或點擊「下一題」繼續刷題</div>
                 </div>
             </div>
         </div>
@@ -219,7 +218,7 @@
                 <input type="text" class="card-input" id="type-input" placeholder="鍵盤輸入答案後按 Enter 或送出..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
                 <button type="submit" class="btn-submit">送出</button>
             </form>
-            <button class="btn-action hidden" id="next-card-btn" onclick="nextCard()">下一題 ➔</button>
+            <button class="btn-action hidden" id="next-card-btn" onclick="nextCard()">下一題 ➔ (Enter)</button>
         </div>
     </div>
 
@@ -229,7 +228,7 @@
             <div class="quiz-q" id="quiz-title">載入中...</div>
             <div class="quiz-opts" id="quiz-options"></div>
         </div>
-        <button class="btn-action hidden" id="quiz-next-btn" onclick="nextQuizQuestion()">下一題 ➔</button>
+        <button class="btn-action hidden" id="quiz-next-btn" onclick="nextQuizQuestion()">下一題 ➔ (Enter)</button>
     </div>
 
     <!-- 3. 代碼庫頁 -->
@@ -489,6 +488,9 @@ function nextCard() {
 
         const isFav = state.favs.includes(currentCard.code);
         document.getElementById('card-star').classList.toggle('active', isFav);
+        
+        // 進入下一題時，自動聚焦回輸入框
+        input.focus();
     }, 200);
 }
 
@@ -545,6 +547,27 @@ function toggleFav(e) {
     document.getElementById('card-star').classList.toggle('active', state.favs.includes(currentCard.code));
 }
 
+// ⌨️ 全域鍵盤監聽：按 Enter 即可觸發下一題
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const nextCardBtn = document.getElementById('next-card-btn');
+        const learnView = document.getElementById('view-learn');
+        if (learnView.classList.contains('active') && !nextCardBtn.classList.contains('hidden')) {
+            e.preventDefault();
+            nextCard();
+            return;
+        }
+
+        const quizNextBtn = document.getElementById('quiz-next-btn');
+        const quizView = document.getElementById('view-quiz');
+        if (quizView.classList.contains('active') && !quizNextBtn.classList.contains('hidden')) {
+            e.preventDefault();
+            nextQuizQuestion();
+            return;
+        }
+    }
+});
+
 const typeInput = document.getElementById('type-input');
 typeInput.addEventListener('focus', () => {
     document.body.classList.add('keyboard-open');
@@ -556,7 +579,6 @@ typeInput.addEventListener('blur', () => {
     document.body.classList.remove('keyboard-open');
 });
 
-// 2. 考題測驗頁 (隨機中翻英 / 英翻中)
 let currentQuiz = null;
 let currentQuizType = 'code2cn';
 
@@ -621,7 +643,6 @@ function checkQuiz(btn, selected, target) {
     document.getElementById('quiz-next-btn').classList.remove('hidden');
 }
 
-// 3. 設定頁面題庫切換
 function changePool(type) {
     state.poolType = type;
     document.querySelectorAll('.pool-opt').forEach(el => el.classList.remove('active'));
@@ -630,7 +651,6 @@ function changePool(type) {
     nextCard();
 }
 
-// 4. 代碼庫搜尋
 function renderSearchList() {
     const q = document.getElementById('search-input').value.toLowerCase();
     const container = document.getElementById('search-list');
@@ -686,7 +706,6 @@ function resetAllData() {
     }
 }
 
-// 初始化
 loadState();
 nextCard();
 nextQuizQuestion();
