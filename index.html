@@ -46,10 +46,11 @@
             display: flex; 
             justify-content: center; 
             min-height: 100vh; 
-            padding-bottom: calc(105px + env(safe-area-inset-bottom, 20px)); 
+            padding-bottom: calc(90px + env(safe-area-inset-bottom, 20px)); 
             transition: background-color 0.2s; 
         }
         
+        /* 手機預設寬度 */
         .app-container { width: 100%; max-width: 480px; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
 
         /* 頂部 Header */
@@ -71,13 +72,20 @@
         .app-title { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: 0.5px; transition: color 0.2s; }
         .theme-toggle { background: var(--card-bg); border: 1px solid var(--border-color); padding: 7px 14px; border-radius: 20px; cursor: pointer; color: var(--text-main); font-size: 13px; font-weight: 700; transition: 0.2s; }
 
+        /* 電腦版頂部專屬選單（手機預設隱藏） */
+        .desktop-nav { display: none; }
+
         /* 數據總覽 Bar */
         .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; background: var(--card-bg); padding: 14px 12px; border-radius: 20px; border: 1px solid var(--border-color); box-shadow: var(--shadow); text-align: center; }
         .stat-item .val { font-size: 18px; font-weight: 800; color: var(--primary); }
         .stat-item .lbl { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 
-        .view-content { display: none; flex-direction: column; gap: 14px; }
+        .view-content { display: none; flex-direction: column; gap: 14px; width: 100%; }
         .view-content.active { display: flex; }
+
+        /* 學習區結構容器（電腦版會切換為雙欄） */
+        .learn-layout { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+        .desktop-side-panel { display: none; }
 
         /* 大卡牌核心容器 */
         .flashcard-container { perspective: 1000px; width: 100%; height: 380px; transition: height 0.25s ease; }
@@ -148,7 +156,7 @@
         .pool-opt { background: var(--input-bg); border: 1px solid var(--border-color); padding: 16px 18px; border-radius: 16px; font-size: 15px; font-weight: 700; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .pool-opt.active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 
-        /* 底部導覽列 */
+        /* 📱 手機底部導覽列 */
         .nav-bar { 
             position: fixed; 
             bottom: 0; 
@@ -167,6 +175,122 @@
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; border: none; background: none; color: var(--text-sub); font-size: 11px; font-weight: 700; cursor: pointer; }
         .nav-item.active { color: var(--primary); }
         .nav-item .icon { font-size: 20px; }
+
+        /* ============================================================
+           💻 電腦端超寬高質感介面（螢幕寬度 >= 860px 時自動啟動）
+           ============================================================ */
+        @media (min-width: 860px) {
+            body { padding-bottom: 30px; }
+            .app-container { max-width: 1100px; padding: 24px 32px; gap: 20px; }
+
+            /* 電腦版頂部導覽列展示，隱藏手機底部懸浮列 */
+            .nav-bar { display: none !important; }
+            .desktop-nav { 
+                display: flex; 
+                gap: 8px; 
+                background: var(--card-bg); 
+                padding: 6px; 
+                border-radius: 18px; 
+                border: 1px solid var(--border-color);
+            }
+            .d-nav-item {
+                border: none;
+                background: transparent;
+                padding: 8px 18px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 700;
+                color: var(--text-sub);
+                cursor: pointer;
+                transition: 0.2s;
+            }
+            .d-nav-item.active {
+                background: var(--primary);
+                color: var(--primary-btn-text);
+            }
+
+            /* 學習頁面：左側刷題 + 右側儀表板雙欄展開 */
+            .learn-layout {
+                display: grid;
+                grid-template-columns: 580px 1fr;
+                gap: 24px;
+                align-items: start;
+            }
+
+            .desktop-side-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                height: 100%;
+            }
+
+            .side-card {
+                background: var(--card-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 24px;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .side-title {
+                font-size: 15px;
+                font-weight: 800;
+                color: var(--primary);
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .shortcut-tip {
+                font-size: 13px;
+                color: var(--text-sub);
+                line-height: 1.6;
+            }
+            .shortcut-key {
+                background: var(--input-bg);
+                border: 1px solid var(--border-color);
+                padding: 2px 7px;
+                border-radius: 6px;
+                color: var(--text-main);
+                font-weight: 700;
+                font-family: monospace;
+            }
+
+            /* 右側微型代碼速查清單 */
+            .mini-search-box {
+                width: 100%;
+                padding: 10px 14px;
+                border-radius: 12px;
+                border: 1px solid var(--border-color);
+                background: var(--input-bg);
+                color: var(--text-main);
+                font-size: 13px;
+                outline: none;
+                margin-bottom: 10px;
+            }
+            .mini-list-scroll {
+                max-height: 250px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                padding-right: 4px;
+            }
+            .mini-list-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 12px;
+                background: var(--input-bg);
+                border-radius: 10px;
+                font-size: 13px;
+            }
+            .mini-list-item .m-code { font-weight: 800; color: var(--primary); }
+            .mini-list-item .m-cn { color: var(--text-sub); font-size: 12px; }
+
+            /* 考題測驗在電腦版寬度限制居中 */
+            #view-quiz .quiz-card,
+            #view-settings .setting-section { max-width: 700px; margin: 0 auto; width: 100%; }
+        }
     </style>
 </head>
 <body>
@@ -177,6 +301,15 @@
             <img src="silks_logo.png" alt="晶英酒店" class="silks-logo" onerror="this.style.display='none'">
             <div class="app-title">OPERA 卡牌大師</div>
         </div>
+
+        <!-- 💻 電腦版頂部切換選單 -->
+        <div class="desktop-nav">
+            <button class="d-nav-item active" onclick="switchTab('learn', this)">📖 學習卡片</button>
+            <button class="d-nav-item" onclick="switchTab('quiz', this)">📝 考題測驗</button>
+            <button class="d-nav-item" onclick="switchTab('search', this)">🔍 代碼庫</button>
+            <button class="d-nav-item" onclick="switchTab('settings', this)">⚙️ 設定</button>
+        </div>
+
         <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙 深色模式</button>
     </header>
 
@@ -188,41 +321,61 @@
         <div class="stat-item"><div class="val" id="st-fav">0</div><div class="lbl">收藏數</div></div>
     </div>
 
-    <!-- 1. 學習卡片頁 -->
+    <!-- 1. 學習卡片頁（支援雙欄電腦端） -->
     <div id="view-learn" class="view-content active">
-        <div class="flashcard-container">
-            <div class="flashcard" id="main-card">
-                <!-- 正面 (題目) -->
-                <div class="card-face card-front">
-                    <span class="card-star" id="card-star" onclick="toggleFav(event)">★</span>
-                    <div class="card-badge" id="card-badge">隨機出題</div>
-                    <div class="card-prompt-text" id="card-prompt">--</div>
-                    <div style="font-size: 13px; color: var(--text-sub);">輸入後送出翻轉卡片 👆</div>
-                </div>
-                <!-- 背面 (解答) -->
-                <div class="card-face card-back">
-                    <div class="result-badge" id="card-result-badge">🎉 答對了！</div>
-                    <div style="margin: auto 0;">
-                        <div class="ans-code" id="card-ans-code">VC</div>
-                        <div class="ans-cn" id="card-ans-cn">房間已清潔，待查房，不可入住</div>
-                        <div class="ans-user" id="card-ans-user">你的輸入：VC</div>
+        <div class="learn-layout">
+            <!-- 左欄：核心刷題卡牌與輸入框 -->
+            <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+                <div class="flashcard-container">
+                    <div class="flashcard" id="main-card">
+                        <div class="card-face card-front">
+                            <span class="card-star" id="card-star" onclick="toggleFav(event)">★</span>
+                            <div class="card-badge" id="card-badge">隨機出題</div>
+                            <div class="card-prompt-text" id="card-prompt">--</div>
+                            <div style="font-size: 13px; color: var(--text-sub);">輸入後送出翻轉卡片 👆</div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="result-badge" id="card-result-badge">🎉 答對了！</div>
+                            <div style="margin: auto 0;">
+                                <div class="ans-code" id="card-ans-code">VC</div>
+                                <div class="ans-cn" id="card-ans-cn">房間已清潔，待查房，不可入住</div>
+                                <div class="ans-user" id="card-ans-user">你的輸入：VC</div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-sub);">按 Enter 或點擊「下一題」繼續刷題</div>
+                        </div>
                     </div>
-                    <div style="font-size: 13px; color: var(--text-sub);">按 Enter 或點擊「下一題」繼續刷題</div>
+                </div>
+
+                <div class="action-area">
+                    <form id="input-form" class="input-group" onsubmit="event.preventDefault(); submitAnswer();">
+                        <input type="text" class="card-input" id="type-input" placeholder="鍵盤輸入答案後按 Enter 或送出..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        <button type="submit" class="btn-submit">送出</button>
+                    </form>
+                    <button class="btn-action hidden" id="next-card-btn" onclick="nextCard()">下一題 ➔ (Enter)</button>
+                </div>
+            </div>
+
+            <!-- 💻 右欄：電腦版專屬即時速查與快捷面板 -->
+            <div class="desktop-side-panel">
+                <div class="side-card">
+                    <div class="side-title">⚡ 電腦端高效率快捷鍵</div>
+                    <div class="shortcut-tip">
+                        • 答案打完直接按 <span class="shortcut-key">Enter</span> 即時送出比對<br>
+                        • 看完解答再按一次 <span class="shortcut-key">Enter</span> 瞬間切換下一題<br>
+                        • 游標會自動聚焦在輸入框，無需觸碰滑鼠
+                    </div>
+                </div>
+
+                <div class="side-card" style="flex: 1;">
+                    <div class="side-title">🔍 邊刷邊查（代碼速查）</div>
+                    <input type="text" class="mini-search-box" id="mini-search" placeholder="輸入代碼或關鍵字快速檢索..." oninput="renderMiniSearch()">
+                    <div class="mini-list-scroll" id="mini-search-list"></div>
                 </div>
             </div>
         </div>
-
-        <!-- 下方輸入框區 -->
-        <div class="action-area">
-            <form id="input-form" class="input-group" onsubmit="event.preventDefault(); submitAnswer();">
-                <input type="text" class="card-input" id="type-input" placeholder="鍵盤輸入答案後按 Enter 或送出..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                <button type="submit" class="btn-submit">送出</button>
-            </form>
-            <button class="btn-action hidden" id="next-card-btn" onclick="nextCard()">下一題 ➔ (Enter)</button>
-        </div>
     </div>
 
-    <!-- 2. 考題測驗頁 (隨機中翻英 / 英翻中) -->
+    <!-- 2. 考題測驗頁 -->
     <div id="view-quiz" class="view-content">
         <div class="quiz-card">
             <div class="quiz-q" id="quiz-title">載入中...</div>
@@ -259,13 +412,13 @@
 
         <div class="setting-section">
             <div class="setting-title">📊 數據管理中心</div>
-            <p style="font-size: 13px; color: var(--text-sub);">答題紀錄與錯題本會自動儲存於手機區域快取。</p>
+            <p style="font-size: 13px; color: var(--text-sub);">答題紀錄與錯題本會自動儲存於手機/電腦區域快取。</p>
             <button class="btn-action" style="background: var(--danger); margin-top: 6px; color: #fff;" onclick="resetAllData()">🗑️ 清空所有紀錄與錯題本</button>
         </div>
     </div>
 </div>
 
-<!-- 底部導覽列 -->
+<!-- 📱 手機端底部導覽列 -->
 <nav class="nav-bar">
     <button class="nav-item active" onclick="switchTab('learn', this)"><span class="icon">📖</span>學習卡片</button>
     <button class="nav-item" onclick="switchTab('quiz', this)"><span class="icon">📝</span>考題測驗</button>
@@ -488,8 +641,6 @@ function nextCard() {
 
         const isFav = state.favs.includes(currentCard.code);
         document.getElementById('card-star').classList.toggle('active', isFav);
-        
-        // 進入下一題時，自動聚焦回輸入框
         input.focus();
     }, 200);
 }
@@ -547,7 +698,7 @@ function toggleFav(e) {
     document.getElementById('card-star').classList.toggle('active', state.favs.includes(currentCard.code));
 }
 
-// ⌨️ 全域鍵盤監聽：按 Enter 即可觸發下一題
+// ⌨️ 全域 Enter 鍵監聽
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const nextCardBtn = document.getElementById('next-card-btn');
@@ -571,14 +722,13 @@ window.addEventListener('keydown', (e) => {
 const typeInput = document.getElementById('type-input');
 typeInput.addEventListener('focus', () => {
     document.body.classList.add('keyboard-open');
-    setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 150);
+    setTimeout(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, 150);
 });
 typeInput.addEventListener('blur', () => {
     document.body.classList.remove('keyboard-open');
 });
 
+// 2. 考題測驗頁
 let currentQuiz = null;
 let currentQuizType = 'code2cn';
 
@@ -670,10 +820,37 @@ function renderSearchList() {
     });
 }
 
+// 電腦版側邊即時速查清單
+function renderMiniSearch() {
+    const q = (document.getElementById('mini-search')?.value || '').toLowerCase();
+    const container = document.getElementById('mini-search-list');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const filtered = db.filter(x => x.code.toLowerCase().includes(q) || x.cn.includes(q)).slice(0, 15);
+    filtered.forEach(x => {
+        const div = document.createElement('div');
+        div.className = 'mini-list-item';
+        div.innerHTML = `
+            <span class="m-code">${x.code}</span>
+            <span class="m-cn">${x.cn}</span>
+        `;
+        container.appendChild(div);
+    });
+}
+
 function switchTab(tab, btn) {
+    // 同步手機與電腦端 Nav Active 狀態
     document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.d-nav-item').forEach(i => i.classList.remove('active'));
     document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
-    btn.classList.add('active');
+
+    const activeIndex = ['learn', 'quiz', 'search', 'settings'].indexOf(tab);
+    if (activeIndex > -1) {
+        document.querySelectorAll('.nav-item')[activeIndex]?.classList.add('active');
+        document.querySelectorAll('.d-nav-item')[activeIndex]?.classList.add('active');
+    }
+
     document.getElementById(`view-${tab}`).classList.add('active');
     if (tab === 'search') renderSearchList();
 }
@@ -709,6 +886,7 @@ function resetAllData() {
 loadState();
 nextCard();
 nextQuizQuestion();
+renderMiniSearch();
 </script>
 </body>
 </html>
