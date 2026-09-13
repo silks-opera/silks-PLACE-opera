@@ -86,6 +86,21 @@
         .learn-layout { display: flex; flex-direction: column; gap: 14px; width: 100%; }
         .desktop-side-panel { display: none; }
 
+        /* 測驗進度條 */
+        .exam-progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--input-bg);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .exam-progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 4%;
+            transition: width 0.3s ease;
+        }
+
         /* 大卡牌核心容器 */
         .flashcard-container { perspective: 1000px; width: 100%; height: 380px; transition: height 0.25s ease; }
         .flashcard { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 28px; }
@@ -121,11 +136,66 @@
         .btn-action:active { opacity: 0.85; }
         .hidden { display: none !important; }
 
+        /* 📊 25 題結算報告專屬樣式 */
+        .exam-result-panel { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+        .score-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .score-title { font-size: 14px; font-weight: 800; color: var(--text-sub); letter-spacing: 0.5px; }
+        .score-val { font-size: 64px; font-weight: 900; color: var(--primary); line-height: 1; margin: 4px 0; }
+        .score-badge { font-size: 15px; font-weight: 800; padding: 6px 18px; border-radius: 20px; }
+        .score-badge.pass { background: rgba(16, 185, 129, 0.2); color: var(--accent); border: 1px solid var(--accent); }
+        .score-badge.fail { background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+        .score-stats { display: flex; gap: 24px; font-size: 13px; color: var(--text-sub); font-weight: 700; margin-top: 4px; }
+        .score-stats span b { color: var(--text-main); font-size: 16px; }
+
+        .exam-report-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .report-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: var(--shadow);
+        }
+        .report-item.is-correct { border-left: 5px solid var(--accent); }
+        .report-item.is-wrong { border-left: 5px solid var(--danger); }
+        .report-header { display: flex; justify-content: space-between; align-items: center; }
+        .report-q-num { font-size: 12px; font-weight: 800; color: var(--text-sub); }
+        .report-tag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 8px; background: var(--input-bg); color: var(--primary); }
+        .report-prompt { font-size: 18px; font-weight: 900; color: var(--text-main); }
+        .report-ans-box {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 13px;
+            background: var(--input-bg);
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .report-user-ans { color: var(--text-sub); }
+        .report-user-ans.ans-correct { color: var(--accent); font-weight: 800; }
+        .report-user-ans.ans-wrong { color: var(--danger); font-weight: 800; }
+        .report-correct-ans { color: var(--text-main); font-weight: 800; }
+
         /* 📱 鍵盤喚起特訓模式 */
         body.keyboard-open { padding-bottom: 10px; }
         body.keyboard-open header,
         body.keyboard-open .stats-bar,
-        body.keyboard-open .nav-bar { display: none !important; }
+        body.keyboard-open .nav-bar,
+        body.keyboard-open .exam-progress-bar-container { display: none !important; }
         body.keyboard-open .flashcard-container { height: 210px !important; margin-top: 4px; }
         body.keyboard-open .card-face { padding: 14px 16px !important; }
         body.keyboard-open .card-prompt-text { font-size: 38px !important; }
@@ -376,38 +446,66 @@
         <div class="stat-item"><div class="val" id="st-fav">0</div><div class="lbl">收藏數</div></div>
     </div>
 
-    <!-- 1. 學習卡片頁 -->
+    <!-- 1. 學習卡片頁 (25 題隨機測驗) -->
     <div id="view-learn" class="view-content active">
         <div class="learn-layout">
-            <!-- 左欄：核心刷題卡牌與輸入框 -->
+            <!-- 左欄：測驗作答區 -->
             <div style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
-                <div class="flashcard-container">
-                    <div class="flashcard" id="main-card">
-                        <div class="card-face card-front">
-                            <span class="card-star" id="card-star" onclick="toggleFav(event)">★</span>
-                            <div class="card-badge" id="card-badge">隨機出題</div>
-                            <div class="card-prompt-text" id="card-prompt">--</div>
-                            <div style="font-size: 13px; color: var(--text-sub);">輸入後送出翻轉卡片 👆</div>
-                        </div>
-                        <div class="card-face card-back">
-                            <div class="result-badge" id="card-result-badge">🎉 答對了！</div>
-                            <div style="margin: auto 0;">
-                                <div class="ans-code" id="card-ans-code">VC</div>
-                                <div class="ans-cn" id="card-ans-cn">房間已清潔，待查房，不可入住</div>
-                                <div class="ans-user" id="card-ans-user">你的輸入：VC</div>
+                
+                <!-- 卡牌作答容器 -->
+                <div id="exam-card-wrapper" style="display: flex; flex-direction: column; gap: 14px; width: 100%;">
+                    <!-- 25 題進度條 -->
+                    <div class="exam-progress-bar-container">
+                        <div class="exam-progress-bar" id="exam-progress"></div>
+                    </div>
+
+                    <div class="flashcard-container">
+                        <div class="flashcard" id="main-card">
+                            <div class="card-face card-front">
+                                <span class="card-star" id="card-star" onclick="toggleFav(event)">★</span>
+                                <div class="card-badge" id="card-badge">第 1 / 25 題</div>
+                                <div class="card-prompt-text" id="card-prompt">--</div>
+                                <div style="font-size: 13px; color: var(--text-sub);">輸入後送出翻轉卡片 👆</div>
                             </div>
-                            <div style="font-size: 13px; color: var(--text-sub);">按 Enter 或點擊「下一題」繼續刷題</div>
+                            <div class="card-face card-back">
+                                <div class="result-badge" id="card-result-badge">🎉 答對了！</div>
+                                <div style="margin: auto 0;">
+                                    <div class="ans-code" id="card-ans-code">VC</div>
+                                    <div class="ans-cn" id="card-ans-cn">房間已清潔，待查房，不可入住</div>
+                                    <div class="ans-user" id="card-ans-user">你的輸入：VC</div>
+                                </div>
+                                <div style="font-size: 13px; color: var(--text-sub);" id="card-back-hint">按 Enter 或點擊繼續</div>
+                            </div>
                         </div>
+                    </div>
+
+                    <div class="action-area">
+                        <form id="input-form" class="input-group" onsubmit="event.preventDefault(); submitAnswer();">
+                            <input type="text" class="card-input" id="type-input" placeholder="鍵盤輸入答案後按 Enter 或送出..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                            <button type="submit" class="btn-submit">送出</button>
+                        </form>
+                        <button class="btn-action hidden" id="next-card-btn" onclick="requestNextCard()">下一題 ➔ (Enter)</button>
                     </div>
                 </div>
 
-                <div class="action-area">
-                    <form id="input-form" class="input-group" onsubmit="event.preventDefault(); submitAnswer();">
-                        <input type="text" class="card-input" id="type-input" placeholder="鍵盤輸入答案後按 Enter 或送出..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                        <button type="submit" class="btn-submit">送出</button>
-                    </form>
-                    <button class="btn-action hidden" id="next-card-btn" onclick="requestNextCard()">下一題 ➔ (Enter)</button>
+                <!-- 25 題測驗結算面板 (預設隱藏) -->
+                <div class="exam-result-panel hidden" id="exam-result-panel">
+                    <div class="score-card">
+                        <div class="score-title">🎯 25 題卡牌隨機測驗成績</div>
+                        <div class="score-val" id="res-score">0</div>
+                        <div class="score-badge" id="res-score-badge">成績計算中...</div>
+                        <div class="score-stats">
+                            <span>答對題數：<b id="res-correct-count">0</b> / 25</span>
+                            <span>每題：<b>4 分</b></span>
+                            <span>滿分：<b>100 分</b></span>
+                        </div>
+                        <button class="btn-action" style="margin-top: 10px;" onclick="startNewExam(true)">🔄 再測一次（換新 25 題）</button>
+                    </div>
+
+                    <div style="font-size: 16px; font-weight: 800; color: var(--text-main); margin-top: 6px;">📋 25 題完整答題清單與解答</div>
+                    <div class="exam-report-list" id="exam-report-list"></div>
                 </div>
+
             </div>
 
             <!-- 💻 右欄：電腦版專屬即時弱點圓餅圖 + 速查清單 -->
@@ -609,6 +707,16 @@ let state = {
     poolType: 'all'
 };
 
+/* 🎯 25 題測驗狀態控制物件 */
+let exam = {
+    totalQuestions: 25,
+    currentIndex: 0,
+    questions: [], // 抽取 25 題不重複：[{ item, direction }]
+    records: [],   // 作答紀錄：[{ num, prompt, promptType, userAns, correctAns, isCorrect, cat, code, cn }]
+    score: 0,
+    isFinished: false
+};
+
 function loadState() {
     const saved = localStorage.getItem('opera_app_data');
     if (saved) state = JSON.parse(saved);
@@ -723,11 +831,6 @@ function checkChineseMatch(userInput, targetStr) {
     return false;
 }
 
-let currentCard = null;
-let currentDirection = 'code';
-let lastSubmitTime = 0;
-let isNextCooldown = false;
-
 function getPool() {
     if (state.poolType === 'wrong') {
         const pool = db.filter(x => state.wrongs.includes(x.code));
@@ -740,8 +843,43 @@ function getPool() {
     return db;
 }
 
-// 支援 autoFocus 參數：預設 true，但在初次載入或切換分頁時傳入 false
-function nextCard(autoFocus = true) {
+/* 🎲 開始新一輪 25 題不重複隨機測驗 */
+function startNewExam(autoFocus = false) {
+    const rawPool = [...getPool()];
+    // Fisher-Yates 洗牌
+    for (let i = rawPool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rawPool[i], rawPool[j]] = [rawPool[j], rawPool[i]];
+    }
+
+    // 取前 25 題 (若題庫小於 25 題則全取)
+    const count = Math.min(25, rawPool.length);
+    const selected = rawPool.slice(0, count);
+
+    exam.totalQuestions = count;
+    exam.currentIndex = 0;
+    exam.records = [];
+    exam.score = 0;
+    exam.isFinished = false;
+
+    // 隨機分配每題方向：code (代碼 ➔ 中文) 或 cn (中文 ➔ 代碼)
+    exam.questions = selected.map(item => ({
+        item: item,
+        direction: Math.random() < 0.5 ? 'code' : 'cn'
+    }));
+
+    // 切換顯示模式
+    document.getElementById('exam-card-wrapper').classList.remove('hidden');
+    document.getElementById('exam-result-panel').classList.add('hidden');
+
+    loadCardQuestion(0, autoFocus);
+}
+
+let lastSubmitTime = 0;
+let isNextCooldown = false;
+
+/* 🃏 載入特定題號的卡片 */
+function loadCardQuestion(index, autoFocus = true) {
     const cardEl = document.getElementById('main-card');
     cardEl.classList.remove('flipped');
 
@@ -750,55 +888,38 @@ function nextCard(autoFocus = true) {
     const input = document.getElementById('type-input');
     input.value = '';
 
+    // 更新進度條
+    const progressPercent = Math.round(((index + 1) / exam.totalQuestions) * 100);
+    document.getElementById('exam-progress').style.width = `${progressPercent}%`;
+
     setTimeout(() => {
-        const pool = getPool();
-        currentCard = pool[Math.floor(Math.random() * pool.length)];
-        
-        currentDirection = Math.random() < 0.5 ? 'code' : 'cn';
+        const qObj = exam.questions[index];
+        const item = qObj.item;
+        const dir = qObj.direction;
         const promptEl = document.getElementById('card-prompt');
 
-        if (currentDirection === 'code') {
-            document.getElementById('card-badge').innerText = `【${currentCard.cat}】代碼 ➔ 請輸入中文`;
-            promptEl.innerText = currentCard.code;
+        if (dir === 'code') {
+            document.getElementById('card-badge').innerText = `第 ${index + 1} / ${exam.totalQuestions} 題 · 【${item.cat}】代碼 ➔ 中文`;
+            promptEl.innerText = item.code;
             promptEl.className = 'card-prompt-text';
             input.placeholder = '請輸入中文意思...';
         } else {
-            document.getElementById('card-badge').innerText = `【${currentCard.cat}】中文 ➔ 請輸入代碼`;
-            promptEl.innerText = currentCard.cn;
-            promptEl.className = currentCard.cn.length > 8 ? 'card-prompt-text long-text' : 'card-prompt-text';
+            document.getElementById('card-badge').innerText = `第 ${index + 1} / ${exam.totalQuestions} 題 · 【${item.cat}】中文 ➔ 代碼`;
+            promptEl.innerText = item.cn;
+            promptEl.className = item.cn.length > 8 ? 'card-prompt-text long-text' : 'card-prompt-text';
             input.placeholder = '請輸入代碼 (例: VC, SSP)...';
         }
 
-        const isFav = state.favs.includes(currentCard.code);
+        const isFav = state.favs.includes(item.code);
         document.getElementById('card-star').classList.toggle('active', isFav);
 
-        // 僅在允許自動聚焦時才 focus，避免剛進入頁面就觸發 keyboard-open 隱藏頂部與底部
         if (autoFocus) {
             input.focus();
         }
     }, 200);
 }
 
-// ⏱️ 停留 1 秒緩衝進下一題，避免按太快漏看錯題答案
-function requestNextCard() {
-    if (isNextCooldown) return;
-    if (Date.now() - lastSubmitTime < 350) return;
-
-    isNextCooldown = true;
-    const btn = document.getElementById('next-card-btn');
-    btn.innerText = "⏳ 1 秒後進入下一題...";
-    btn.style.opacity = "0.75";
-    btn.style.pointerEvents = "none";
-
-    setTimeout(() => {
-        btn.innerText = "下一題 ➔ (Enter)";
-        btn.style.opacity = "1";
-        btn.style.pointerEvents = "auto";
-        isNextCooldown = false;
-        nextCard(true);
-    }, 1000);
-}
-
+/* 📥 提交本題答案 */
 function submitAnswer() {
     const input = document.getElementById('type-input');
     const val = input.value.trim();
@@ -807,52 +928,154 @@ function submitAnswer() {
     lastSubmitTime = Date.now();
     input.blur();
 
+    const qObj = exam.questions[exam.currentIndex];
+    const item = qObj.item;
+    const dir = qObj.direction;
+
     state.stats.total++;
     let isCorrect = false;
 
-    if (currentDirection === 'code') {
-        isCorrect = checkChineseMatch(val, currentCard.cn);
+    if (dir === 'code') {
+        isCorrect = checkChineseMatch(val, item.cn);
     } else {
         const cleanUser = val.toUpperCase().replace(/[\s\-_/]/g, '');
-        const cleanTarget = currentCard.code.toUpperCase().replace(/[\s\-_/]/g, '');
+        const cleanTarget = item.code.toUpperCase().replace(/[\s\-_/]/g, '');
         isCorrect = (cleanUser === cleanTarget);
     }
 
     if (isCorrect) {
         state.stats.correct++;
         state.stats.streak++;
-        const wIdx = state.wrongs.indexOf(currentCard.code);
+        exam.score += 4; // 一題 4 分
+        const wIdx = state.wrongs.indexOf(item.code);
         if (wIdx > -1) state.wrongs.splice(wIdx, 1);
     } else {
         state.stats.streak = 0;
-        if (!state.wrongs.includes(currentCard.code)) state.wrongs.push(currentCard.code);
+        if (!state.wrongs.includes(item.code)) state.wrongs.push(item.code);
     }
     saveState();
 
+    // 紀錄此題作答資訊
+    exam.records.push({
+        num: exam.currentIndex + 1,
+        cat: item.cat,
+        code: item.code,
+        cn: item.cn,
+        prompt: dir === 'code' ? item.code : item.cn,
+        promptType: dir === 'code' ? '英翻中 (代碼 ➔ 中文)' : '中翻英 (中文 ➔ 代碼)',
+        userAns: val,
+        correctAns: dir === 'code' ? item.cn : item.code,
+        isCorrect: isCorrect
+    });
+
+    // 翻轉卡片
     const resBadge = document.getElementById('card-result-badge');
     resBadge.className = `result-badge ${isCorrect ? 'correct' : 'wrong'}`;
-    resBadge.innerText = isCorrect ? '🎉 答對了！' : '❌ 答錯了！';
+    resBadge.innerText = isCorrect ? '🎉 答對了！(+4分)' : '❌ 答錯了！(+0分)';
 
-    document.getElementById('card-ans-code').innerText = currentCard.code;
-    document.getElementById('card-ans-cn').innerText = currentCard.cn;
+    document.getElementById('card-ans-code').innerText = item.code;
+    document.getElementById('card-ans-cn').innerText = item.cn;
     document.getElementById('card-ans-user').innerText = `你的回答：${val}`;
 
     document.getElementById('main-card').classList.add('flipped');
-
     document.getElementById('input-form').classList.add('hidden');
+
     const nextBtn = document.getElementById('next-card-btn');
-    nextBtn.innerText = "下一題 ➔ (Enter)";
+    if (exam.currentIndex >= exam.totalQuestions - 1) {
+        nextBtn.innerText = "🏁 查看測驗成績與解答 (Enter)";
+        document.getElementById('card-back-hint').innerText = "點擊或按 Enter 查看 25 題總成績報告";
+    } else {
+        nextBtn.innerText = `下一題 (${exam.currentIndex + 2}/${exam.totalQuestions}) ➔ (Enter)`;
+        document.getElementById('card-back-hint').innerText = "按 Enter 或點擊「下一題」繼續刷題";
+    }
     nextBtn.classList.remove('hidden');
+}
+
+/* ⏱️ 下一題 / 完成測驗 */
+function requestNextCard() {
+    if (isNextCooldown) return;
+    if (Date.now() - lastSubmitTime < 350) return;
+
+    // 若已經是最後一題，結算進入成績面板
+    if (exam.currentIndex >= exam.totalQuestions - 1) {
+        showExamResult();
+        return;
+    }
+
+    isNextCooldown = true;
+    const btn = document.getElementById('next-card-btn');
+    btn.innerText = "⏳ 載入下一題...";
+    btn.style.opacity = "0.75";
+    btn.style.pointerEvents = "none";
+
+    setTimeout(() => {
+        btn.style.opacity = "1";
+        btn.style.pointerEvents = "auto";
+        isNextCooldown = false;
+        exam.currentIndex++;
+        loadCardQuestion(exam.currentIndex, true);
+    }, 400);
+}
+
+/* 📊 展現 25 題測驗報告與成績清單 */
+function showExamResult() {
+    exam.isFinished = true;
+    document.getElementById('exam-card-wrapper').classList.add('hidden');
+    const resultPanel = document.getElementById('exam-result-panel');
+    resultPanel.classList.remove('hidden');
+
+    const correctCount = exam.records.filter(r => r.isCorrect).length;
+    const finalScore = correctCount * 4; // 滿分 100
+
+    document.getElementById('res-score').innerText = `${finalScore}分`;
+    document.getElementById('res-correct-count').innerText = correctCount;
+
+    const badge = document.getElementById('res-score-badge');
+    if (finalScore >= 90) {
+        badge.className = 'score-badge pass';
+        badge.innerText = '🏆 優秀超群！熟練度極高！';
+    } else if (finalScore >= 60) {
+        badge.className = 'score-badge pass';
+        badge.innerText = '💪 恭喜及格！再接再厲衝刺滿分！';
+    } else {
+        badge.className = 'score-badge fail';
+        badge.innerText = '📚 需多加強！建議重測並複習錯題。';
+    }
+
+    // 渲染 25 題清單
+    const listContainer = document.getElementById('exam-report-list');
+    listContainer.innerHTML = '';
+
+    exam.records.forEach(r => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `report-item ${r.isCorrect ? 'is-correct' : 'is-wrong'}`;
+        itemDiv.innerHTML = `
+            <div class="report-header">
+                <span class="report-q-num">第 ${r.num} 題 · ${r.promptType}</span>
+                <span class="report-tag">【${r.cat}】${r.isCorrect ? '✔ +4分' : '✘ 0分'}</span>
+            </div>
+            <div class="report-prompt">${r.prompt}</div>
+            <div class="report-ans-box">
+                <div class="report-user-ans ${r.isCorrect ? 'ans-correct' : 'ans-wrong'}">你的回答：${r.userAns} ${r.isCorrect ? '(正確)' : '(錯誤)'}</div>
+                <div class="report-correct-ans">標準解答：${r.correctAns}</div>
+            </div>
+        `;
+        listContainer.appendChild(itemDiv);
+    });
+
+    // 滾動回頂部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggleFav(e) {
     e.stopPropagation();
-    if (!currentCard) return;
-    const idx = state.favs.indexOf(currentCard.code);
+    const currentItem = exam.questions[exam.currentIndex]?.item;
+    if (!currentItem) return;
+    const idx = state.favs.indexOf(currentItem.code);
     if (idx > -1) state.favs.splice(idx, 1);
-    else state.favs.push(currentCard.code);
+    else state.favs.push(currentItem.code);
     saveState();
-    document.getElementById('card-star').classList.toggle('active', state.favs.includes(currentCard.code));
+    document.getElementById('card-star').classList.toggle('active', state.favs.includes(currentItem.code));
 }
 
 let lastQuizAnswerTime = 0;
@@ -882,7 +1105,7 @@ window.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
         const nextCardBtn = document.getElementById('next-card-btn');
         const learnView = document.getElementById('view-learn');
-        if (learnView.classList.contains('active') && !nextCardBtn.classList.contains('hidden')) {
+        if (learnView.classList.contains('active') && !nextCardBtn.classList.contains('hidden') && !exam.isFinished) {
             e.preventDefault();
             requestNextCard();
             return;
@@ -907,7 +1130,7 @@ typeInput.addEventListener('blur', () => {
     document.body.classList.remove('keyboard-open');
 });
 
-// 2. 考題測驗頁
+// 2. 考題測驗頁 (四選一)
 let currentQuiz = null;
 let currentQuizType = 'code2cn';
 
@@ -981,7 +1204,7 @@ function changePool(type) {
     document.querySelectorAll('.pool-opt').forEach(el => el.classList.remove('active'));
     document.getElementById(`pool-${type}`).classList.add('active');
     saveState();
-    nextCard(false); // 切換題庫時也不主動聚焦
+    startNewExam(false);
 }
 
 function renderSearchList() {
@@ -1067,7 +1290,7 @@ function resetAllData() {
 
 // 初始化
 loadState();
-nextCard(false); // 👈 關鍵修改：初次開啟不自動聚焦，完整呈現圖二畫面
+startNewExam(false); // 首次開啟不搶焦點，維持完整首頁
 nextQuizQuestion();
 renderMiniSearch();
 </script>
