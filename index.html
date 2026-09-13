@@ -740,7 +740,8 @@ function getPool() {
     return db;
 }
 
-function nextCard() {
+// 支援 autoFocus 參數：預設 true，但在初次載入或切換分頁時傳入 false
+function nextCard(autoFocus = true) {
     const cardEl = document.getElementById('main-card');
     cardEl.classList.remove('flipped');
 
@@ -770,14 +771,18 @@ function nextCard() {
 
         const isFav = state.favs.includes(currentCard.code);
         document.getElementById('card-star').classList.toggle('active', isFav);
-        input.focus();
+
+        // 僅在允許自動聚焦時才 focus，避免剛進入頁面就觸發 keyboard-open 隱藏頂部與底部
+        if (autoFocus) {
+            input.focus();
+        }
     }, 200);
 }
 
 // ⏱️ 停留 1 秒緩衝進下一題，避免按太快漏看錯題答案
 function requestNextCard() {
     if (isNextCooldown) return;
-    if (Date.now() - lastSubmitTime < 350) return; // 防止送出答案的同次 Enter 誤觸連擊
+    if (Date.now() - lastSubmitTime < 350) return;
 
     isNextCooldown = true;
     const btn = document.getElementById('next-card-btn');
@@ -790,7 +795,7 @@ function requestNextCard() {
         btn.style.opacity = "1";
         btn.style.pointerEvents = "auto";
         isNextCooldown = false;
-        nextCard();
+        nextCard(true);
     }, 1000);
 }
 
@@ -976,7 +981,7 @@ function changePool(type) {
     document.querySelectorAll('.pool-opt').forEach(el => el.classList.remove('active'));
     document.getElementById(`pool-${type}`).classList.add('active');
     saveState();
-    nextCard();
+    nextCard(false); // 切換題庫時也不主動聚焦
 }
 
 function renderSearchList() {
@@ -1060,8 +1065,9 @@ function resetAllData() {
     }
 }
 
+// 初始化
 loadState();
-nextCard();
+nextCard(false); // 👈 關鍵修改：初次開啟不自動聚焦，完整呈現圖二畫面
 nextQuizQuestion();
 renderMiniSearch();
 </script>
